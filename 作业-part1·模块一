@@ -1,0 +1,243 @@
+作业-part1·模块一
+简答题
+1.
+异步编程:由于JavaScript是单线程(一次只能完成一件任务，如果有多个任务就必须排队等候，前面一个任务完成，再执行后面一个任务)执行语言，导致任务执行效率低，为了解决这个问题，提出了异步模式(后一个任务不等前一个任务执行完就执行，每个任务有一个或多个回调函数)，其实就是相当于找到一个方式，不去等那些耗时的任务完成才能执行下一个任务，而是告诉那些耗时的任务，你忙着，忙完了告诉我，我想干啥已经通过回调函数的方式告诉你了，如果后边有任务，后边任务也不用等待当前任务执行完毕才能执行。
+
+EventLoop:javascript上， 所有同步任务都在主线程上执行，也可以理解为存在一个“执行栈”。主线程外，还有一个“任务队列”，任务队列的作用，就在等待异步任务的结果，只要异步任务有了运行结果，就会加入到“任务队列”中。一旦执行栈中所有同步任务执行完毕，就从 任务队列 中读取“任务”加入到“执行栈”中。主线程不断的在循环上面的步骤。负责监听调用栈和消息队列，一旦调用栈所有任务都结束，事件循环就会从消息队列中取出第一个回调函数压入调用栈。
+
+我们一般将回调队列中的任务称之为"宏任务"，宏任务执行过程当中可以临时加上一些额外需求，这些临时额外需求可以选择作为一个新的宏任务进到队列中排队，也可以作为当前任务的"微任务"，直接在当前任务结束过后立即执行。
+
+代码题
+1.
+let promise = new Promise((resolve,reject)=>{
+	resolve('hello')
+})
+promise.then(value=>{
+	return(value+' lagou')
+}).then(value=>{
+	console.log(value+' i ❤️ you')
+})
+console.log(a)
+
+2.
+练习1:
+const fp = require('lodash/fp')
+let f = fp.flowRight(fp.prop('in_stock'), fp.last)
+f(cars)
+练习2:
+let f1 = fp.flowRight(fp.prop('name'), fp.first)
+f1(cars)
+练习3:
+const map = _.curry((key,array)=>_.map(array,key))
+let averageDollarValue = fp.flowRight(_average, map('dollar_value'))
+averageDollarValue(cars)
+练习4:
+let _underscore = fp.replace(/\W+/g,'_')
+let sanitizeNames = fp.flowRight(_underscore, _.toLower)
+console.log(sanitizeNames(['Hello World']))
+
+3.
+练习1:
+let ex1 = (x) => mayBe.map((array)=>fp.map(y=>fp.add(x,y),array))
+练习2:
+let ex2 = (array) => {
+	return xs.map(array => fp.first(array))
+}
+练习3:
+let ex3 = (name,obj) => {
+	return safeProp(name,obj).map(x=>fp.split("",x)).map(x=>fp.first(x))._value
+}
+console.log(ex3('name',user))
+练习4:
+let ex4 = (n) => {
+	return MayBe.of(n).map(n=>n)._value
+}
+
+4.手写promise源码
+这里我很认真的想了下，把自己跟着老师课程里一个字一个字敲下来的代码和注释放在这里了
+<code>
+//把状态定义成常量，编辑器会有提示，同时也有利于代码的复用
+const PENDING = 'pending' //等待
+const FULFILLED = 'fulfilled' //成功
+const REJECTED = 'rejected' //失败
+class myPromise{
+    constructor(executor){
+        //捕获执行过程中的错误
+        try{
+            //接收执行器，并且这个执行器是立即执行的
+            executor(this.resolve,this.reject)
+        } catch(e){
+            this.reject(e)
+        }
+    }
+    //promise状态
+    status = PENDING;
+    //每一个promise对象成功之后都有自己成功的值
+    value = undefined;
+    //每一个promise对象失败之后都有自己失败的原因
+    reason = undefined;
+    //成功回调
+    successCallback = [];//数组才可以存储多个可能的then方法的回调函数，failCallback同理
+    //失败回调
+    failCallback = [];
+    //定义成箭头函数是因为箭头函数在定义的时候就确定this的指向
+    resolve = value => {
+        //如果状态不是等待，阻止程序向下执行
+        if(this.status !== PENDING) return ;
+        //将状态更改为成功
+        this.status = FULFILLED
+        //保存成功之后的值
+        this.value = value
+        //判断成功回调是否存在，如果存在就调用
+        //this.successCallback && this.successCallback(this.value)//用数组存储回调事件，这里就不能再用了
+        while(this.successCallback.length){
+            this.successCallback.shift()()
+        }
+    }
+    reject = reason => {
+        //如果状态不是等待，阻止程序向下执行
+        if(this.status !== PENDING) return ;
+        //将状态更改为失败
+        this.status = REJECTED
+        //保存失败之后的原因
+        this.reason = reason
+        //判断失败回调是否存在，如果存在就调用
+        //this.failCallback && this.failCallback(this.reason)
+        while(this.failCallback.length){
+            this.failCallback.shift()()
+        }
+    }
+    then(successCallback,failCallback){
+        successCallback = successCallback ? successCallback : value => value ;
+        failCallback = failCallback ? failCallback : reason => {throw reason} ;
+        let promise2 = new myPromise((resolve,reject) => {
+            //判断状态
+            if(this.status === FULFILLED){
+                //在所有同步代码执行完毕后再执行，能顺利获取promise2
+                setTimeout(()=>{
+                    try{
+                        let  x = successCallback(this.value);
+                        //resolve(x)
+                        //判断x的值是普通值还是promise对象
+                        //如果是普通值，直接resolve
+                        //如果是promise对象，查看promise对象返回的结果
+                        //再根据promise对象返回的结果，决定调用resolve还是reject
+                        resolvePromise(promise2, x, resolve, reject)
+                    }catch(e){
+                        reject(e)
+                    }
+                },0)
+            }else if(this.status === REJECTED){
+                setTimeout(()=>{
+                    try{
+                        let  x = failCallback(this.reason);
+                        //resolve(x)
+                        //判断x的值是普通值还是promise对象
+                        //如果是普通值，直接resolve
+                        //如果是promise对象，查看promise对象返回的结果
+                        //再根据promise对象返回的结果，决定调用resolve还是reject
+                        resolvePromise(promise2, x, resolve, reject)
+                    }catch(e){
+                        reject(e)
+                    }
+                },0)
+            }else{
+                //走到这里证明当前状态是等待pending
+                //将成功回调和失败回调存储起来
+                this.successCallback.push(()=>{
+                    setTimeout(()=>{
+                        try{
+                            let  x = successCallback(this.value);
+                            //resolve(x)
+                            //判断x的值是普通值还是promise对象
+                            //如果是普通值，直接resolve
+                            //如果是promise对象，查看promise对象返回的结果
+                            //再根据promise对象返回的结果，决定调用resolve还是reject
+                            resolvePromise(promise2, x, resolve, reject)
+                        }catch(e){
+                            reject(e)
+                        }
+                    },0)
+                })
+                this.failCallback.push(()=>{
+                    setTimeout(()=>{
+                        try{
+                            let  x = failCallback(this.reason);
+                            //resolve(x)
+                            //判断x的值是普通值还是promise对象
+                            //如果是普通值，直接resolve
+                            //如果是promise对象，查看promise对象返回的结果
+                            //再根据promise对象返回的结果，决定调用resolve还是reject
+                            resolvePromise(promise2, x, resolve, reject)
+                        }catch(e){
+                            reject(e)
+                        }
+                    },0)
+                })
+            }
+        });
+        return promise2 
+    }
+    finally(callback){
+        return this.then(value=>{
+            // callback()
+            // return value
+            return myPromise.resolve(callback()).then(() => value)
+        },reason=>{
+            // callback()
+            // throw reason
+            return myPromise.resolve(callback()).then(() => {throw reason})
+        })
+    }
+    catch(failCallback){
+        return this.then(undefined, failCallback)
+    }
+    //类相当于实例的原型，所有在类中定义的方法，都会被实例继承。
+    //如果在一个方法前，加上static关键字，就表示该方法不会被实例继承，
+    //而是直接通过类来调用（通过类调用指在该类之外调用），这就称为“静态方法”。
+    static all(array){
+        let result = []
+        let index = 0
+        return new myPromise((resolve,reject)=>{
+            function addData(key, value){
+                result[key] = value;
+                index++
+                // 保证异步操作都完成才结束all方法
+                if(index === array.length){
+                    resolve(result)
+                }
+            }
+            for(let i=0;i<array.length;i++){
+                let current = array[i];
+                if(current instanceof myPromise){
+                    //current 是一个promise对象，要执行这个对象
+                    current.then(value => addData(i,value),reason => reject(reason))
+                }else{
+                    //current 是一个普通值
+                    addData(i,array[i])
+                }
+            }
+            //resolve(result)
+        })
+    }
+    static resolve(value){
+        if(value instanceof myPromise) return value;
+        return new myPromise(resolve => resolve(value))
+    }
+}
+function resolvePromise(promise2, x, resolve, reject){
+    if(promise2 === x){
+        return reject(new TypeError('Chaining cycle detected for promise #<promise>'))
+    }
+    if(x instanceof myPromise){
+        //promise对象
+        //x.then(value=>resolve(value),reason=>reject(reason))
+        x.then(resolve,reject)
+    }else{
+        //普通值
+        resolve(x)
+    }
+}
+module.exports = myPromise;
+</code>
+https://snakexu.github.io/tags/%E6%8B%89%E5%8B%BE/
