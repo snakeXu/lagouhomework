@@ -59,9 +59,7 @@ imagemin 这个总是提示
 Warning: Couldn't load default plugin "gifsicle" Use --force to continue.
 gifsicle在做gulp的时候就遇到，单独安装也是失败，查到的原因是说imagemin和node版本不匹配，
 在gulp里重新各种版本重新安装一番总算成功了，但是在这里还没有解决
-试图压缩生成的css，用了cssmin，但是可能是我对grunt和任务的理解还是有问题，
-Running "cssmin:target" (cssmin) task
->> No files created.
+构建了css、js、html，但是样式不能正确引入，页面错乱
 待解决……<br/>
 [gulpfile.js文件](https://github.com/snakeXu/lagouhomework/blob/master/gruntfile.js)
 同样只是提交了gruntfile.js文件，因为觉得做的实在是太差劲了
