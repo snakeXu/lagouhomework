@@ -52,6 +52,8 @@ https://github.com/snakeXu/small-cli
 根据项目构建过程，style, script, page可以parallel执行，
 而处理文件路径要等到文件处理完成才能执行，所以要series执行。
 每次执行都要clean上次任务生成的文件
+https://github.com/snakeXu/lagouhomework/blob/master/gulpfile.js
+因为整个过程都是跟着课程内容做下来的，这里只提交了gulpfile.js文件
 ------
 3、使用 Grunt 完成项目的自动化构建
 本来是想在课程内容的基础上多加两个插件的，但是都遇见问题了…… 
@@ -63,3 +65,5 @@ gifsicle在做gulp的时候就遇到，单独安装也是失败，查到的原�
 Running "cssmin:target" (cssmin) task
 >> No files created.
 待解决……
+https://github.com/snakeXu/lagouhomework/blob/master/gruntfile.js
+同样只是提交了gruntfile.js文件，因为觉得做的实在是太差劲了
