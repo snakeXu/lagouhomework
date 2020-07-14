@@ -54,7 +54,7 @@ module.exports = grunt => {
             expand: true,
             cwd: 'src/assets/styles',
             src: ['*.scss'],
-            dest: 'dist/assets/styles',
+            dest: 'temp/assets/styles',
             ext: '.css'
         }]
       }
@@ -69,7 +69,7 @@ module.exports = grunt => {
             expand: true,
             cwd: 'src/assets/scripts',
             src: ['*.js'],
-            dest: 'dist/assets/scripts',
+            dest: 'temp/assets/scripts',
             ext: '.js'
         }]
       }
@@ -110,8 +110,8 @@ module.exports = grunt => {
           {
             expand: true,
             cwd: "src/",
-            src: "*.html",
-            dest: 'dist'
+            src: "**.html",
+            dest: 'temp'
           }
         ]
       }  
@@ -122,19 +122,81 @@ module.exports = grunt => {
     browserSync: {
       bsFiles: {
         src: [
-          'dist/assets/styles/*.css',
-          'dist/assets/scripts/*.js',
-          'dist/*.html'
+          'temp/assets/styles/*.css',
+          'temp/assets/scripts/*.js',
+          'temp/*.html'
         ]
       },
       options: {
         watchTask: true,
         server: {
-          baseDir:'dist/',
+          baseDir:'temp/',
           routes: {
             '/node_modules': 'node_modules'
           }
         }
+      }
+    },
+    // useminPrepare: {
+    //   html: 'dist/*.html',
+    //   options: {
+    //     dest: 'dist'
+    //   }
+    // },
+    // useref:{
+    //   html: 'dist/*.html',
+    //   temp: ['dist','.'],
+    //   dest: 'dist'
+    // },
+    usemin: {
+      html: 'temp/*.html',
+      css: 'temp/assets/styles/*.css',
+      options: {
+        assetsDirs: ['temp','.']
+      }
+    },
+    htmlmin: {
+      file: {
+        options: {
+          collapseBooleanAttributes: true,
+          collapseWhitespace: true,
+          conservativeCollapse: true,
+          removeAttributeQuotes: true,
+          removeCommentsFromCDATA: true,
+          removeEmptyAttributes: true,
+          removeOptionalTags: true,
+          // true would impact styles with attribute selectors
+          removeRedundantAttributes: false,
+          useShortDoctype: true
+        },
+        files: {
+          expand: true,
+          cwd: 'temp',
+          src: ['**/*.html'],
+          dest: 'dist'
+        }
+      }
+    },
+    uglify: {//压缩js文件
+      payment: {
+        files: [{
+          expand: true,
+          cwd: 'temp/assets/scripts', //js源文件目录
+          src: '*.js', //所有js文件
+          dest: 'dist/assets/scripts' //输出到此目录下
+        }]
+      }
+    },
+    cssmin: { //压缩css
+      payment: {
+        files:[
+        {
+          expand: true,
+          cwd: 'temp/assets/styles', //js源文件目录
+          src: '*.css', //所有js文件
+          dest: 'dist/assets/styles' //输出到此目录下
+        }
+        ]
       }
     },
     watch: {
@@ -145,10 +207,16 @@ module.exports = grunt => {
       css: {
         files: ['src/assets/styles/*.scss'],
         tasks: ['sass']
+      },
+      html: {
+        files: ['src/*.html'],
+        tasks: ['web_swig']
       }
     }
   })
   loadGruntTasks(grunt) // 自动加载所有的 grunt 插件中的任务
-
-  grunt.registerTask('default', ['clean','sass', 'babel', 'web_swig', 'browserSync', 'watch'])
+  // grunt.loadNpmTasks('grunt-htmlmin');
+  // grunt.registerTask('htmlmin',)
+  // grunt.registerTask('default', ['clean', 'sass', 'babel', 'web_swig', 'htmlmin', 'usemin', 'browserSync', 'watch'])
+  grunt.registerTask('default', ['clean', 'sass', 'babel', 'web_swig', 'uglify', 'cssmin', 'browserSync', 'watch'])
 }

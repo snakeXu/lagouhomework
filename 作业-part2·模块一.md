@@ -49,17 +49,13 @@
 安装browser-async浏览器同步测试工具就要监听文件变化，用useref处理文件中路径问题。
 根据项目构建过程，style, script, page可以parallel执行，
 而处理文件路径要等到文件处理完成才能执行，所以要series执行。
-每次执行都要clean上次任务生成的文件
-[gulpfile.js文件](https://github.com/snakeXu/lagouhomework/blob/master/gulpfile.js)
+每次执行都要clean上次任务生成的文件，接着将gulpfile和页面相关一些可外部输入/配置的数据提取出来约定文件名为page.config.js，
+外部数据，处理路径等都可以通过这个文件配置。最后指定执行路径等，完全脱离gulpfile
+[跟着教程一步步配置，被提取文件前的项目](https://github.com/snakeXu/pages-boilerplate)
+[最后生成的没有发布的](https://github.com/snakeXu/gulp-zce-demo)
 因为整个过程都是跟着课程内容做下来的，这里只提交了gulpfile.js文件
 
 3、使用 Grunt 完成项目的自动化构建
-本来是想在课程内容的基础上多加两个插件的，但是都遇见问题了…… 
-imagemin 这个总是提示
-Warning: Couldn't load default plugin "gifsicle" Use --force to continue.
-gifsicle在做gulp的时候就遇到，单独安装也是失败，查到的原因是说imagemin和node版本不匹配，
-在gulp里重新各种版本重新安装一番总算成功了，但是在这里还没有解决
-构建了css、js、html，但是样式不能正确引入，页面错乱
-待解决……<br/>
+为了弄grunt确实废了很大力气，还是只简单处理了scss和js文件并且压缩了css、js文件，压缩html文件和替换html引入路径都没有成功
 [gulpfile.js文件](https://github.com/snakeXu/lagouhomework/blob/master/gruntfile.js)
-同样只是提交了gruntfile.js文件，因为觉得做的实在是太差劲了
+整个项目并没有成功的成为一个cli文件，所以只是提交了gruntfile.js文件
