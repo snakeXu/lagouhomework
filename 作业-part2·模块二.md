@@ -51,3 +51,4 @@ class MyPlugin{
 二、编程题
 1、使用 Webpack 实现 Vue 项目打包任务
 https://github.com/snakeXu/02-02-vue-app-base
+说明文档：https://github.com/snakeXu/02-02-vue-app-base/blob/master/%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md
