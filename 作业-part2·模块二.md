@@ -50,3 +50,4 @@ class MyPlugin{
 ```
 二、编程题
 1、使用 Webpack 实现 Vue 项目打包任务
+https://github.com/snakeXu/02-02-vue-app-base
